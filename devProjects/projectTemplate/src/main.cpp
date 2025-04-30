@@ -2,14 +2,28 @@
  * Testing environment.
  */
 
+/**
+ * DEBUG: 
+ * E (119) gpio: esp_ipc_call_blocking failed (0x103)
+ * [   119][E][esp32-hal-gpio.c:119] __attachInterruptFunctionalArg(): GPIO ISR Service Failed To Start
+ * E (132) gpio: gpio_install_isr_service(450): GPIO isr service already installed
+ */
+
 #include <Arduino.h>
 
-#define HC_VERSION 0x
+#define HC_VERSION 0x50
 #include "../../../hardwareConfigs/hardwareConfigsSelector.h"
 
 #include "deltaTime.h"
 deltaTimeMicros deltaTime;
 
+
+#include "../../../customLibs/pwmSensor.h"
+#if S_PWM_COUNT > 1
+pwmSensor pwmSensorObj(S_PWM_PIN_L, S_PWM_PIN_R);
+#else
+#error Not enough pwm sensors.
+#endif
 
 void setup() {
   Serial.begin(115200);
