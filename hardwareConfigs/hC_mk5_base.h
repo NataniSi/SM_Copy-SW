@@ -4,20 +4,20 @@
 // Leds.
 #define S_LED_COUNT 4
 #define S_LED_PIN_1 44
-#define S_LED_PIN_2 47
+#define S_LED_PIN_2 43
 #define S_LED_PIN_3 36
 #define S_LED_PIN_4 01
 
 // Buzzers.
 #define S_BUZZER_COUNT 1
-#define S_BUZZER_PIN_1 04
+#define S_BUZZER_PIN_1 02
 
 // Buttons.
-#define S_BUTTON_COUNT 2
-#define S_BUTTON_1_PIN      04
+#define S_BUTTON_COUNT      2
+#define S_BUTTON_1_PIN_1    04
 #define S_BUTTON_1_INVERTED 1
 #define S_BUTTON_1_NEEDS_PU 0
-#define S_BUTTON_1_PIN      05
+#define S_BUTTON_1_PIN_2    05
 #define S_BUTTON_1_INVERTED 1
 #define S_BUTTON_1_NEEDS_PU 0
 
