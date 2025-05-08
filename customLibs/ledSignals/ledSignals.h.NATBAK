@@ -1,0 +1,114 @@
+#ifndef _LED_SIGNALS_H
+#define _LED_SIGNALS_H
+
+#include <Arduino.h>
+
+#define PIN_UNDEFINED (uint8_t)-1
+
+class ledSignals {
+private:
+  uint8_t  pin       = PIN_UNDEFINED;
+  uint32_t timeStart = 0, timeEnd = 0, timeNextFlip = 0;
+  uint16_t onTime, offTime;
+  uint8_t  cycle;
+  bool     pinState = 0;
+
+public:
+  ledSignals(uint8_t pin);
+  void set(bool force, uint16_t onTime, uint16_t offTime, uint8_t cycles);
+  void loop();
+  void stop();
+};
+
+
+
+ledSignals::ledSignals(uint8_t pin) {
+  this->pin = pin;
+  pinMode(pin, OUTPUT);
+}
+
+
+/**
+ * @param force Whether to force the new signal if the old one is still running.
+ * @param onTime  How long should the led stay on each loop.
+ * @param offTime How long should the led stay off each loop.
+ * @param cycles Number of repetetions.
+ * @brief Set an led to blink in a specific pattern for <cycles> cycles. All time related values are in ms.
+ */
+void ledSignals::set(bool force, uint16_t onTime, uint16_t offTime, uint8_t cycles) {
+  // Check setup.
+  if(pin == PIN_UNDEFINED) {
+    return;
+  }
+
+  uint32_t timeNow = millis();
+  // Check running.
+  if(timeNow < timeEnd) {
+    if(force != 1) {
+      return;
+    }
+  }
+
+  // Set important timestamps.
+  timeStart    = timeNow;
+  timeEnd      = (onTime + offTime) * cycles + timeNow - offTime; // Subtract the last off time because it's empty anyway.
+  timeNextFlip = timeStart + onTime;
+  // Set vars.
+  this->onTime  = onTime;
+  this->offTime = offTime;
+  cycle         = 0;
+
+  if(onTime != 0) {
+    digitalWrite(pin, 1);
+    pinState = 1;
+  }
+}
+
+
+/**
+ * @brief Updates the output and stuff.
+ */
+void ledSignals::loop() {
+  uint32_t timeNow = millis();
+  // Already ended.
+  if(timeNow >= timeEnd) {
+    if(pinState == 1) {
+      digitalWrite(pin, 0);
+      pinState = 0;
+    }
+
+    return;
+  }
+
+  // Check if flip point not reached.
+  if(timeNow < timeNextFlip) {
+    return;
+  }
+
+  // Flip.
+  digitalWrite(pin, !pinState);
+  pinState = !pinState;
+
+  // Set next flip timestamp.
+  if(pinState == 1) {
+    timeNextFlip = (onTime + offTime) * (cycle + 1) + timeStart + offTime;
+    cycle++;
+  } else {
+    timeNextFlip = (onTime + offTime) * (cycle + 1) + timeStart;
+  }
+}
+
+
+/**
+ * @brief Ends the signal.
+ */
+void ledSignals::stop() {
+  uint32_t timeNow = millis();
+  timeEnd          = timeNow;
+  digitalWrite(pin, 0);
+}
+
+
+#undef PIN_UNDEFINED
+
+#endif
